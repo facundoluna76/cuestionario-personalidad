@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+:root {
+  --background: hsl(32deg 55.56% 94.71%);
+  --foreground: #171717;
+
+  /* Meraki color palette */
+  --meraki-cream: hsl(32deg 55.56% 94.71%);
+  --meraki-sage: hsl(66.92deg 25.74% 60.39%);
+  --meraki-coral: hsl(13.33deg 79.12% 64.31%);
+  --meraki-gold: hsl(42.68deg 93.71% 68.82%);
+
+  /* Darker variants for hover states */
+  --meraki-sage-dark: hsl(66.92deg 25.74% 50%);
+  --meraki-coral-dark: hsl(13.33deg 79.12% 54%);
+  --meraki-gold-dark: hsl(42.68deg 93.71% 58%);
+
+  /* Light variants */
+  --meraki-cream-light: hsl(32deg 55.56% 97%);
+  --meraki-sage-light: hsl(66.92deg 25.74% 90%);
+  --meraki-coral-light: hsl(13.33deg 79.12% 92%);
+  --meraki-gold-light: hsl(42.68deg 93.71% 90%);
+}
+
+@theme inline {
+  --color-background: #f5ead8;
+  --color-foreground: #171717;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Meraki theme colors */
+  --color-meraki-cream: #f5ead8;
+  --color-meraki-cream-light: #faf5ed;
+  --color-meraki-sage: #a3ad7e;
+  --color-meraki-sage-dark: #889a5f;
+  --color-meraki-sage-light: #e9eddd;
+  --color-meraki-coral: #e8795a;
+  --color-meraki-coral-dark: #d65c38;
+  --color-meraki-coral-light: #fadad1;
+  --color-meraki-gold: #f9c84a;
+  --color-meraki-gold-dark: #f0b020;
+  --color-meraki-gold-light: #fdf0c8;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
