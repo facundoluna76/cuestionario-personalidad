@@ -93,7 +93,7 @@ export default function Questionnaire() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Cuestionario de Personalidad
             </h1>
-            <p className="text-gray-500">CPQ - Cuestionario de Personalidad para Niños</p>
+            <p className="text-gray-500">CPQ - Cuestionario de Personalidad</p>
           </div>
 
           <div className="space-y-4 mb-8">

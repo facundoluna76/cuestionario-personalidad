@@ -49,7 +49,7 @@ export default function Results({ results, userName, userAge, onRestart }: Resul
               <h1 className="text-3xl font-bold text-gray-900 mb-1">
                 Resultados del Cuestionario
               </h1>
-              <p className="text-gray-500">CPQ - Cuestionario de Personalidad para Niños</p>
+              <p className="text-gray-500">CPQ - Cuestionario de Personalidad</p>
             </div>
             <div className="flex gap-3 print:hidden">
               <button
