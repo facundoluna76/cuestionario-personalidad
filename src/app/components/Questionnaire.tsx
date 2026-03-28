@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { questions } from "../data/questionsList";
 import { calculateResults, SubscaleResult } from "../utils/scoring";
-import Results from "./Results";
+import Completion from "./Completion";
 
 const QUESTIONS_PER_PAGE = 13;
 const totalPages = Math.ceil(questions.length / QUESTIONS_PER_PAGE);
@@ -11,7 +11,8 @@ const totalPages = Math.ceil(questions.length / QUESTIONS_PER_PAGE);
 export default function Questionnaire() {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [currentPage, setCurrentPage] = useState(0);
-  const [showResults, setShowResults] = useState(false);
+  const [showCompletion, setShowCompletion] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [results, setResults] = useState<SubscaleResult[] | null>(null);
   const [showError, setShowError] = useState(false);
   const [userName, setUserName] = useState("");
@@ -58,21 +59,56 @@ export default function Questionnaire() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!allAnswered) {
       setShowError(true);
       return;
     }
     const res = calculateResults(answers);
     setResults(res);
-    setShowResults(true);
+    
+    // Guardar resultados en localStorage
+    const submission = {
+      id: Date.now().toString(),
+      userName,
+      userAge,
+      results: res,
+      answers,
+      timestamp: new Date().toISOString(),
+    };
+    
+    const stored = localStorage.getItem("questionnaire-submissions");
+    const submissions = stored ? JSON.parse(stored) : [];
+    submissions.push(submission);
+    localStorage.setItem("questionnaire-submissions", JSON.stringify(submissions));
+    
+    // Enviar resultados por email (opcional)
+    setIsSendingEmail(true);
+    try {
+      await fetch('/api/send-results', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userName,
+          userAge,
+          results: res,
+          answers,
+        }),
+      });
+    } catch (error) {
+      console.error('Error al enviar resultados:', error);
+    } finally {
+      setIsSendingEmail(false);
+    }
+    
+    setShowCompletion(true);
     scrollToTop();
   };
 
   const handleRestart = () => {
     setAnswers({});
     setCurrentPage(0);
-    setShowResults(false);
+    setShowCompletion(false);
     setResults(null);
     setStarted(false);
     setUserName("");
@@ -137,26 +173,34 @@ export default function Questionnaire() {
           </div>
 
           <button
-            onClick={() => {
-              if (userName.trim() && userAge.trim()) setStarted(true);
-            }}
+            onClick={() => setStarted(true)}
             disabled={!userName.trim() || !userAge.trim()}
             className="w-full py-4 bg-meraki-coral text-white rounded-xl font-semibold text-lg hover:bg-meraki-coral-dark transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
           >
             Comenzar Cuestionario
           </button>
         </div>
+
+        {/* Admin button */}
+        <a
+          href="/admin"
+          className="absolute top-4 right-4 p-2.5 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 transition-all group"
+          title="Panel de administración"
+        >
+          <svg className="w-5 h-5 text-gray-600 group-hover:text-meraki-coral transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </a>
       </div>
     );
   }
 
-  if (showResults && results) {
+  if (showCompletion) {
     return (
       <div ref={topRef}>
-        <Results
-          results={results}
+        <Completion
           userName={userName}
-          userAge={userAge}
           onRestart={handleRestart}
         />
       </div>
@@ -279,9 +323,10 @@ export default function Questionnaire() {
           ) : (
             <button
               onClick={handleSubmit}
-              className="px-8 py-3 bg-meraki-sage text-white rounded-xl font-medium hover:bg-meraki-sage-dark transition-all shadow-md hover:shadow-lg"
+              disabled={isSendingEmail}
+              className="px-8 py-3 bg-meraki-sage text-white rounded-xl font-medium hover:bg-meraki-sage-dark transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Ver Resultados
+              {isSendingEmail ? 'Enviando...' : 'Finalizar Cuestionario'}
             </button>
           )}
         </div>
